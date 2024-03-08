@@ -1,0 +1,18 @@
+app:
+  env: dev
+  name: food-recipes-service
+  jwt:
+    key: "Assignment1LAW2024"
+web:
+  prefork: false
+  port: 8080
+database:
+  username: root
+  password: BA@rio2024
+  host: localhost
+  port: 3306
+  name: food_recipe
+  pool:
+    idle: 10
+    max: 20
+    lifetime: 300

@@ -1,0 +1,566 @@
+---
+openapi: "3.0.3"
+info:
+  title: "Food Recipes"
+  version: "1"
+  description: "Food Recipes web service for LAW assignment 1"
+  contact:
+    name: "Septio Nugroho"
+    email: "septio.nugroho@ui.ac.id"
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/septio-nugroho/food-recipe/1
+  - url: "http://localhost:8080"
+    description: "Local server"
+paths:
+  /users/register:
+    post:
+      tags:
+        - Users
+      summary: "Register a new user"
+      description: "Register a new user to the database"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: "object"
+              properties:
+                username:
+                  type: "string"
+                email:
+                  type: "string"
+                password:
+                  type: "string"
+                firstName:
+                  type: "string"
+                lastName:
+                  type: "string"
+            examples:
+              Example1:
+                value:
+                  username: "john"
+                  email: "john@gmail.com"
+                  password: "password"
+                  firstName: "John"
+                  lastName: "Doe"
+              Example2:
+                value:
+                  username: "jane"
+                  email: "jane123@gmail.com"
+                  password: "password"
+                  firstName: "Jane"
+                  lastName: "Mari"
+      responses:
+        "201":
+          description: "User created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  error:
+                    type: "string"
+              examples:
+                BadRequest:
+                  value:
+                    message: "Bad request"
+                    error: "Invalid request body"
+
+  /users/login:
+    post:
+      tags:
+        - Users
+      summary: "Login a user"
+      description: "Login a user to the database"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserLogin"
+      responses:
+        "200":
+          description: "Success login"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  token:
+                    type: "string"
+                example:
+                  token: "thisisjwttoken"
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  error:
+                    type: "string"
+              examples:
+                BadRequest:
+                  value:
+                    message: "Bad request"
+                    error: "Invalid request body"
+
+
+  /recipes:
+    get:
+      tags:
+        - "Recipes"
+      summary: "Get all recipes"
+      description: "Get all recipes from the database"
+      parameters:
+        - $ref: "#/components/parameters/include"
+        - $ref: "#/components/parameters/exclude"
+      responses:
+        "200":
+          description: "Success get all recipes"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Recipe"
+              examples:
+                Success:
+                  $ref: "#/components/examples/SuccessRecipes"
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  error:
+                    type: "string"
+              examples:
+                BadRequest:
+                  value:
+                    message: "Bad request"
+                    error: "Invalid query parameters. Parameters should only contain\
+                      \ alphabets"
+  /recipes/id/{id}:
+    get:
+      tags:
+        - "Recipes"
+      summary: "Get all recipes by id"
+      description: "Get all recipes based on the name from the database"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          description: "id of the recipe"
+          schema:
+            type: "number"
+          examples:
+            id1:
+              value: 1
+              description: "get recipe with id 1"
+            id2:
+              value: 2
+              description: "get recipe with id 2"
+        - $ref: "#/components/parameters/include"
+        - $ref: "#/components/parameters/exclude"
+      responses:
+        "200":
+          description: "Success get recipe by id"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Recipe"
+              examples:
+                Success:
+                  $ref: "#/components/examples/SuccessRecipes"
+        "401":
+          $ref: "#/components/UnauthorizedResponse"
+
+  /recipes/name/{name}:
+    get:
+      tags:
+        - "Recipes"
+      summary: "Get all recipes by name"
+      description: "Get all recipes based on the name from the database"
+      parameters:
+        - name: "name"
+          in: "path"
+          required: true
+          description: "part or whole of the name of the recipe"
+          schema:
+            type: "string"
+          examples:
+            example1:
+              value: "ayam"
+              description: "Get all recipes that contain 'ayam' in the name"
+            example2:
+              value: "tahu"
+              description: "Get all recipes that contain 'tahu' in the name"
+        - $ref: "#/components/parameters/include"
+        - $ref: "#/components/parameters/exclude"
+      responses:
+        "200":
+          description: "Success get all recipes by name"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Recipe"
+              examples:
+                Success:
+                  $ref: "#/components/examples/SuccessRecipes"
+        "400":
+          description: "Bad request"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  message:
+                    type: "string"
+                  error:
+                    type: "string"
+              examples:
+                BadRequest:
+                  value:
+                    message: "Bad request"
+                    error: "Invalid query parameters. Parameters should only contain\
+                      \ alphabets"
+        "401":
+          $ref: "#/components/UnauthorizedResponse"
+
+  /recipes/top-liked:
+    get:
+      tags:
+        - "Recipes"
+      summary: "Get top liked recipes"
+      description: "Get top liked recipes from the database"
+      responses:
+        "200":
+          description: "Success get top liked recipes"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/RecipeLikes"
+              examples:
+                Success:
+                  $ref: "#/components/examples/SuccessRecipesLikes"
+        "401":
+          $ref: "#/components/UnauthorizedResponse"
+
+  /user/recipes/{recipeId}/like:
+    post:
+      tags:
+        - "Recipes"
+      summary: "Like a recipe"
+      description: "Like a recipe"
+      parameters:
+        - name: "recipeId"
+          in: "path"
+          required: true
+          description: "id of the recipe"
+          schema:
+            type: "number"
+          examples:
+            id1:
+              value: 1
+              description: "like recipe with id 1"
+            id2:
+              value: 2
+              description: "like recipe with id 2"
+      responses:
+        "200":
+          description: "Success like recipe"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                example:
+                  message: "success  like recipe"
+        "401":
+          $ref: "#/components/UnauthorizedResponse"
+
+    delete:
+      tags:
+        - "Recipes"
+      summary: "Unlike a recipe"
+      description: "Unlike a recipe"
+      parameters:
+        - name: "recipeId"
+          in: "path"
+          required: true
+          description: "id of the recipe"
+          schema:
+            type: "number"
+          examples:
+            id1:
+              value: 1
+              description: "unlike recipe with id 1"
+            id2:
+              value: 2
+              description: "unlike recipe with id 2"
+      responses:
+        "200":
+          description: "Success unlike recipe"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "success unlike recipe"
+        "401":
+          $ref: "#/components/UnauthorizedResponse"
+
+  /users/recipes/liked:
+    get:
+      tags:
+        - "Recipes"
+      summary: "Get all liked recipes"
+      description: "Get all liked recipes from the database"
+      responses:
+        "200":
+          description: "Success get all liked recipes"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Recipe"
+              examples:
+                Success:
+                  $ref: "#/components/examples/SuccessRecipes"
+        "401":
+          $ref: "#/components/UnauthorizedResponse"
+
+components:
+  examples:
+    SuccessRecipes:
+      value:
+        - id: 1
+          name: "Ayam Goreng"
+          cookingTime: 30
+          serving: 4
+          ingredients:
+            - name: "ayam"
+              quantity: 1
+              unit: "kg"
+            - name: "garam"
+              quantity: 1
+              unit: "sdt"
+          steps:
+            - stepNumber: 1
+              description: "Goreng ayam sampai matang"
+            - stepNumber: 2
+              description: "Tambahkan garam"
+        - id: 2
+          name: "Tahu Goreng"
+          cookingTime: 20
+          serving: 4
+          ingredients:
+            - name: "tahu"
+              quantity: 1
+              unit: "kg"
+            - name: "garam"
+              quantity: 1
+              unit: "sdt"
+          steps:
+            - stepNumber: 1
+              description: "Goreng tahu sampai matang"
+            - stepNumber: 2
+              description: "Tambahkan garam"
+
+    SuccessRecipesLikes:
+      value:
+        - id: 1
+          name: "Ayam Goreng"
+          totalLikes: 100
+        - id: 2
+          name: "Tahu Goreng"
+          totalLikes: 90
+        - id: 3
+          name: "Nasi Goreng"
+          totalLikes: 80
+  parameters:
+    include:
+      name: "include"
+      in: "query"
+      required: false
+      description: "filter recipes that include the given ingredients"
+      schema:
+        type: "array"
+        items:
+          type: "string"
+      examples:
+        Example1:
+          description: "Example of including ingredients"
+          value:
+            - "tomat"
+            - "lada"
+        Example2:
+          description: "Another example of including ingredients"
+          value:
+            - "gula"
+            - "jahe"
+    exclude:
+      name: "exclude"
+      in: "query"
+      required: false
+      description: "filter recipes that exclude the given ingredients"
+      schema:
+        type: "array"
+        items:
+          type: "string"
+      examples:
+        Example1:
+          description: "Example of excluding ingredients"
+          value:
+            - "gula"
+            - "tepung"
+        Example2:
+          description: "Another example of excluding ingredients"
+          value:
+            - "susu"
+            - "mentega"
+  schemas:
+    UserAuth:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        email:
+          type: "string"
+        password:
+          type: "string"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+      example:
+        username: "john"
+        email: "john@gmail.com"
+        password: "password"
+        firstName: "John"
+        lastName: "Doe"
+
+    UserResponse:
+      type: object
+      properties:
+        username:
+          type: "string"
+        email:
+          type: "string"
+        firstName:
+          type: "string"
+        lastName:
+          type: "string"
+        createdAt:
+          type: integer
+        updatedAt:
+          type: integer
+      example:
+        username: "john_doe"
+        email: "john@gmail.com"
+        firstName: "John"
+        lastName: "Doe"
+        createdAt: 1612345678
+        updatedAt: 1612345678
+    UserLogin:
+      type: "object"
+      properties:
+        identifier:
+          description: "username or email"
+          type: "string"
+        password:
+          type: "string"
+      example:
+        identifier: "john_doe"
+        password: "password"
+
+    RecipeLikes:
+      type: object
+      properties:
+        id:
+          type: number
+        name:
+          type: string
+        totalLikes:
+          type: number
+
+    Recipe:
+      type: "object"
+      properties:
+        id:
+          type: "number"
+        name:
+          type: "string"
+        cookingTime:
+          type: "number"
+        serving:
+          type: "number"
+        ingredients:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Ingredient"
+        steps:
+          type: "array"
+          items:
+            $ref: "#/components/schemas/Step"
+    Ingredient:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        quantity:
+          type: "number"
+        unit:
+          type: "string"
+    Step:
+      type: "object"
+      properties:
+        stepNumber:
+          type: "number"
+        description:
+          type: "string"
+  UnauthorizedResponse:
+    description: "User not authorized"
+    content:
+      application/json:
+        schema:
+          type: "object"
+          properties:
+            message:
+              type: "string"
+            error:
+              type: "string"
+        examples:
+          Unauthorized:
+            value:
+              status: 401
+              error: "Unauthorized"
